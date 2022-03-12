@@ -19,7 +19,7 @@
 
 ## Xây Dựng Hệ Thống Mạng Windows Trên AWS
 
- 1. Sơ đồ mạng
+ **1. Tổng quan sơ đồ mạng**
  
 ![Mô hình mạng AWS](https://github.com/minhhung1706/AWS-Windows-Infrastructure/blob/d80492df28586e7b4e1519ee79f4b4d4511b02c0/images/Network-Diagram.png)
 
@@ -52,4 +52,5 @@ Nhìn vào sơ đồ mạng này, chúng ta sẽ thấy những thành phần sa
  - NAT Gateway: Dùng để khai thông giao típ giữa các dịch vụ trong vùng: Private IP <=> Public IP
  - Auto Scaling Group (ASG): Đây là 1 tính năng rất hay mà khó lòng triển khai ở on-primes. Nó cho phép chúng ta cấu hình việc thêm máy chủ cho việc cân bằng tải vào giờ cao điểm, và giảm đi khi vào lúc bình thường nhằm tiết kiệm chi phí. On-premise, khi thực hiện việc này, xác định là sẽ rất tốn kém, vì chún ta không thể thêm hoặc bớt lượn máy chủ vật lý / ảo. Nhưng cái này làm được trên AWS nhờ vào ASG. 
  - Remote Desktop Gateway: đây là 1 bastion host dùng để truy cập từ nơi làm việc đến kiến trúc AWS của chúng ta. Còn gọi cách khác là jump-host. 
- - 
+ 
+**2. Bắt đầu xây dựng hệ thống mạng**
