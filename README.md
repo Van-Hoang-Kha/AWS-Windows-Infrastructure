@@ -53,7 +53,53 @@ Nhìn vào sơ đồ mạng này, chúng ta sẽ thấy những thành phần sa
  
 **II. Bắt đầu xây dựng hệ thống mạng**
 
-1. Cấu hình IAM Role: AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource trên AWS sẽ có những quyền hạn nhất định từ Denied All Access cho đến Allowed All Access. Ngoài ra, chúng ta cũng có thể dùng IAM để gán 1 số quyền nhất định nhằm thỏa mãn việc thiết kế architect best practices mà AWS đề ra: Least Privilege. Có nghĩa là phân quyền sao cho vừa đủ để thực hiện tác vụ ==> nhằm nâng cao độ an toàn cho toàn bộ hệ thống. 
+**1. Cấu hình IAM Role:** 
+
+AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource trên AWS sẽ có những quyền hạn nhất định từ Denied All Access cho đến Allowed All Access. Ngoài ra, chúng ta cũng có thể dùng IAM để gán 1 số quyền nhất định nhằm thỏa mãn việc thiết kế architect best practices mà AWS đề ra: Least Privilege. Có nghĩa là phân quyền sao cho vừa đủ để thực hiện tác vụ ==> nhằm nâng cao độ an toàn cho toàn bộ hệ thống. 
 - Vào AWS Management Console 
 - Chọn IAM Role
-![iam]()
+![iam](images/iam-1.jpg)
+- Chọn Roles => Create Role (góc phải trên)
+![iam](images/iam-2.jpg)
+- Chọn như hình => NEXT
+![iam](images/iam-3.jpg)
+- Chúng ta sẽ tìm và add các permission vào roles đang thực hiện. Lưu ý là khi tìm được 1 dịch vụ, bấm chọn, sau đó phải bấm X để Permission đó và tìm cái khác. Nếu không bấm X để xóa thì sẽ không tìm ra. Tương tự sẽ add tất cả các Permission như sau vào:
+![iam](images/iam-4.jpg)
+- Sẽ có tổng cộng là 5 Permissions như hình dưới. Sau đó bấm NEXT
+![iam](images/iam-5.jpg)
+- Sau đó sẽ là review lại roles, điền tên, thêm tag. Tùy chỉnh tùy ý. Sau cùng xuống dưới bấm Create. Vậy là đã có 1 Role bao gồm các Permissions đầy đủ để thực hiện công việc join domain.
+![iam](images/iam-6.jpg)
+
+**2. Thiết kế AWS Network** 
+
+2.1: Tạo VPC
+- Vào AWS Management Console, tìm VPC => Tại giao diện VPC => Create VPC
+![vpc](images/vpc-1.jpg)
+- Tạo 1 VPC như hình. Sau đó bấm Create
+![vpc](images/vpc-2.jpg)
+- Tại giao diện VPC vừa tạo, góc phải trên chúng ta bung thẻ Action ra => Edit DNS Host Name => Check Enable DNS Host Name => Save Change. 
+- Làm tương tự cho DNS Resolution => Để phân giải tên domain/ip của chúng ta trên môi trường network
+![vpc](images/vpc-3.jpg)
+
+
+2.2: Tạo Subnet
+- Tại VPC Management Console => Góc trái sẽ có những option => chọn Subnet => Create Subnet
+![subnet](images/subnet-1.jpg)
+- Tạo subnet như hình => Create subnet
+- Các bạn nên vào trang web này [Tự Động Chia Subnet](https://www.davidc.net/sites/default/subnets/subnets.html) để phân chia subnet cho hiệu quả, tránh sai sót
+![subnet](images/subnet-2.jpg)
+- Tương tự như vậy, chúng ta sẽ có tổng cộng 4 Subnets trải đều trên 2 AZ. Theo hình mình làm sẽ là ap-southeast-2a và ap-southeast-2b. 
+- Lần lượt sẽ là 1 public và 1 private trên mỗi AZ
+- Tên subnets các bạn có thể đặt theo ý, miễn sao trực quan, dễ phân biệt và dễ thực hiện công việc là được. Nó hoàng toàn không có ý nghĩa gì và không liên quan hay ảnh hưởng gì đến môi trường network. 
+![subnet](images/subnet-3.jpg)
+
+2.3: Tạo Internet Gateway
+- Như đã giải trình ở trên, 1 network trên AWS nằm trong VPC sẽ mặc định là private network, không thể ra internet được. Vì lẽ đó mà chúng ta cần phải có Internet Gateway để route traffic ra/vào 1 network chỉ định để làm thành Public Subnet.
+- Tại VPC Management Console => Góc trái sẽ có những option => chọn Internet Gateway => Create Internet Gateway (IGW)
+![internet-gateway](images/igw-1.jpg)
+- Sau đó tạo 1 IGW => Create Internet Gateway
+![internet-gateway](images/igw-2.jpg)
+- Attach IGW to VPC
+![internet-gateway](images/igw-3.jpg)
+- Chọn VPC của bài lab này
+![internet-gateway](images/igw-4.jpg)
