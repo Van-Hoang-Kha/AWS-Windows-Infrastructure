@@ -56,4 +56,4 @@ Nhìn vào sơ đồ mạng này, chúng ta sẽ thấy những thành phần sa
 1. Cấu hình IAM Role: AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource trên AWS sẽ có những quyền hạn nhất định từ Denied All Access cho đến Allowed All Access. Ngoài ra, chúng ta cũng có thể dùng IAM để gán 1 số quyền nhất định nhằm thỏa mãn việc thiết kế architect best practices mà AWS đề ra: Least Privilege. Có nghĩa là phân quyền sao cho vừa đủ để thực hiện tác vụ ==> nhằm nâng cao độ an toàn cho toàn bộ hệ thống. 
 - Vào AWS Management Console 
 - Chọn IAM Role
-![iam](:::image type="content" source="images/iam-1.jpg" alt-text="":::)
+![iam]()
