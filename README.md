@@ -8,18 +8,16 @@
  - Các bài lab/giải pháp sẽ dịch ngược sơ đồ hệ thống thành step by step
    để giải trình cách làm
  - Nếu như muốn tham khảo file Infrastructure as Code (IaC) thì có thể
-   truy cập đường dẫn đã cung cấp phía trên Khi thực hiện xong. 
+   truy cập đường dẫn đã cung cấp phía trên khi thực hiện xong. 
  - Xin lưu ý hãy xóa hết tất cả những dữ liệu đã làm để tránh chi phí
    AWS không  cần thiết. 
  - Đây sẽ là những bài lab/giải pháp típ nối nhau thành 1 chuỗi các bài
    lab nhằm cung cấp đầy đủ nhất có thể được về việc triển khai hệ thống
    Windows trên AWS
- - Trong quá trình thực hiện, sẽ xem xét thêm các custom lab, thí dụ như
-   quản lý Active Directory,  AWS Workspace.
 
 ## Xây Dựng Hệ Thống Mạng Windows Trên AWS
 
- **1. Tổng quan sơ đồ mạng**
+ **I. Tổng quan sơ đồ mạng**
  
 ![Mô hình mạng AWS](https://github.com/minhhung1706/AWS-Windows-Infrastructure/blob/d80492df28586e7b4e1519ee79f4b4d4511b02c0/images/Network-Diagram.png)
 
@@ -53,4 +51,9 @@ Nhìn vào sơ đồ mạng này, chúng ta sẽ thấy những thành phần sa
  - Auto Scaling Group (ASG): Đây là 1 tính năng rất hay mà khó lòng triển khai ở on-primes. Nó cho phép chúng ta cấu hình việc thêm máy chủ cho việc cân bằng tải vào giờ cao điểm, và giảm đi khi vào lúc bình thường nhằm tiết kiệm chi phí. On-premise, khi thực hiện việc này, xác định là sẽ rất tốn kém, vì chún ta không thể thêm hoặc bớt lượn máy chủ vật lý / ảo. Nhưng cái này làm được trên AWS nhờ vào ASG. 
  - Remote Desktop Gateway: đây là 1 bastion host dùng để truy cập từ nơi làm việc đến kiến trúc AWS của chúng ta. Còn gọi cách khác là jump-host. 
  
-**2. Bắt đầu xây dựng hệ thống mạng**
+**II. Bắt đầu xây dựng hệ thống mạng**
+
+1. Cấu hình IAM Role: AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource trên AWS sẽ có những quyền hạn nhất định từ Denied All Access cho đến Allowed All Access. Ngoài ra, chúng ta cũng có thể dùng IAM để gán 1 số quyền nhất định nhằm thỏa mãn việc thiết kế architect best practices mà AWS đề ra: Least Privilege. Có nghĩa là phân quyền sao cho vừa đủ để thực hiện tác vụ ==> nhằm nâng cao độ an toàn cho toàn bộ hệ thống. 
+- Vào AWS Management Console 
+- Chọn IAM Role
+![]()
