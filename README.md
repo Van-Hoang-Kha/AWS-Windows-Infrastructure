@@ -131,5 +131,68 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 - Route 0.0.0.0/0 , gắn vào NAT Gateway để ra internet cho Private Subnet => Save Changes
 ![nat-gateway](images/nat-gw-3.jpg)
 
-**3. Thiết kế AWS EC2** 
+**3. Thiết kế AWS Managed Active Directory Service (AWS Managed AD)** 
+- AWS Management Console => Directory Service => Setup Directory
+![aws-ad](images/aws-ad-1.jpg)
+- Chọn như hình => NEXT
+![aws-ad](images/aws-ad-2.jpg)
+- Standard Edition, điền tên domain, password. Lưu ý là mặc định username của AWS Managed AD sẽ là Admin. Nên chúng ta chỉ cần setup password
+![aws-ad](images/aws-ad-3.jpg)
+- Chọn VPC và AZ. Lưu ý là AWS Managed AD bắt buộc phải có 2 AZ thì mới có thể khởi tạo được. Và nên tạo trong Private Subnet
+![aws-ad](images/aws-ad-4.jpg)
+- Chúng ta check lại thông tin và bấm Create Directory
+![aws-ad](images/aws-ad-5.jpg)
+- Sẽ mất khá lâu tầm 40 phút để cho AWS tạo các dịch vụ nền và promote AD.
+- Chúng ta sẽ kiểm tra lại để xem AD có vào trạng thái Active hay chưa. Nếu trạng thái là Active thì có nghĩa là đã khởi tạo thành công. Một số trường hợp do underlied-host của AWS có vấn đề, nên có thể trạng thái AD sẽ là Failed. Nên kiểm tra chắc chắn lại.
+![aws-ad](images/aws-ad-6.jpg)
+
+**4. Thiết kế AWS EC2** 
+- Tại AWS Management Console => EC2 => Launch Instances
+![ec2](images/ec2-1.jpg)
+- Chọn Windows Server 2022
+![ec2](images/ec2-2.jpg)
+- chọn t2.micro
+![ec2](images/ec2-3.jpg)
+- Tinh chỉnh setting cho EC2 như hình. Lưu ý là chúng ta sẽ phân tác vụ cho EC2 nên cần chọn chính xác các option. Theo hình thì EC2 này sẽ thực hiện tác vụ như 1 bastion-host (jump-host). Vì vậy sẽ ở Public Subnet, nhận  Public ip, joined domain và có IAM Role 
+![ec2](images/ec2-4.jpg)
+- Sau đó sẽ add storage => add theo tùy ý. Quan trọng là xong lab thì nhớ phải xóa hết tất cả resources
+![ec2](images/ec2-5.jpg)
+- Add Tag. Không nên bỏ qua phần này vì về sau system thật tế sẽ dùng Tag: Name-Value để quản lý, đặc biệt là việc thanh toán bill AWS. Ngoài ra thì khi có Tag, EC2 của bạn sẽ dễ dàng phân biệt và trực quan hơn.
+![ec2](images/ec2-6.jpg)
+- Sau đó là sẽ tạo Security Group (SG). Phục vụ cho mục đích bài lab. Chúng ta sẽ tạo SG đơn giản bằng cách All Traffic => Allow All. Nhưng đây KHÔNG phải là Security Best Practices. Khi môi trường công việc, nên thiết kế SG sao cho vừa đủ cần thiết xài là được. 
+![ec2](images/ec2-7.jpg)
+- Sau đó là Review & Launch. Tại bước này, AWS sẽ hỏi bạn việc khởi tạo public/private key cho EC2. Hình dưới minh họa việc đã có key và xài lại thì phải check dòng "Acknowledgement ...." 
+![ec2](images/ec2-8.jpg)
+- Minh họa cho việc tạo mới key. Thì bạn phài save key mới tạo về local thì sẽ xài được. Sau đó Launch Instance
+![ec2](images/ec2-9.jpg)
+- Tạo thêm 1 EC2 nữa như trên. Nhưng lưu ý những option sau: 
+
+=> chọn Instance loại 2x.large: Lý do là EC2 này sẽ đảm nhiệm 1 số tác vụ cần đến sức mạnh phần cứng và tốc độ mạng tốt. Nếu chọn t2.micro thì sẽ xử lý khá lâu và có thể bị đơ trong quá trình làm
+=> Private Subnet
+
+=> Auto Assigned Public IP: DISABLE
+
+=> chọn IAM Roles và AD đã tạo
+
+=> Tag: Để tên là AD-Manager hoặc tên gì tùy ý bạn. Tên hoàng toàn không ảnh hưởng gì nhưng nó thể hiện trực quan chức năng của EC2. MIễn sao bạn không nhầm là được
+![ec2](images/ec2-10.jpg)
+
+=> Security Group: Chọn SG vừa mới tạo và SG có tên dxxxx_controller. Lý do vì đây là SG đặc biệt của AWS Managed AD tạo ra. 
+![ec2](images/ec2-11.jpg)
+
+- Sau đó chọn key và khởi tạo EC2 như cái vừa làm
+- Mất 1 lúc để EC2 hoạt động được. Cho dù status: Checked Passed 2/2 nhưng cũng nên đợi 1~2 phút để cho instance hoàng thành việc warm-up thì mới log-in vào được.
+- Để log-in vào 1 EC2, chọn EC2 đó => Connect => RDP Client
+![ec2](images/ec2-12.jpg)
+![ec2](images/ec2-13.jpg)
+- Chúng ta có thể download file RDP hoặc xài public ip và RPD trên máy local cũng được. 
+- Ngoài ra, chọn phần Get Password => Browse file RSA Key khi nãy vào và bấm Decrypt sẽ ra password cho bạn login. 
+- Nếu bạn muốn login dạng domain thì: domain-name\Admin. Password là password đã khởi tạo ở phần AWS Managed AD
+![ec2](images/ec2-14.jpg)
+- Nếu bạn xài phần mềm RDP ở local thì có thể sử dụng Public IP như đã nói để login vào EC2. Lưu ý là, chỉ những EC2 ở phần Public Network mới có Public IP. Và những EC2 ở phần Private Network sẽ KO có Public IP, mà chỉ có Private IP.
+![ec2](images/ec2-15.jpg)
+- Vậy là đã log-in được từ Local => Bastion Host. Từ Bastion Host này, chúng ta sẽ login vào AD-Manager. Login theo phương thức domain
+![ec2](images/ec2-16.jpg)
+![ec2](images/ec2-17.jpg)
+![ec2](images/ec2-18.jpg)
 
