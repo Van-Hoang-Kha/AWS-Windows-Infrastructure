@@ -198,4 +198,15 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 - Để hoàng thành việc quản lý AWS Managed AD. Chúng ta cần phải cài các dịch vụ cho EC2 AD-Manager. Các bạn làm Admin thì cũng không quá xa lạ gì với các dịch vụ này rồi
 - Vào Server Management => Add Role & Features => Next đến Features (chúng ta không promote AD nên bỏ qua phần server roles): Group Policy Management, Remote Server Administration Tools => Role Administration Tools: AD AD & AD LDS, DNS Server Tools => NEXT 
 - Mất 1 lúc để hoàng thành việc setup. Sau đó kiểm tra lại sẽ thấy những server tools quen thuộc. 
- 
+- Vậy là chúng ta đã hoàng thành việc quản trị AWS Managed AD trên EC2
+
+**5. Thiết kế AWS FSx - Windows** 
+- AWS Management Console => Amazon FSx => Create File System
+![fsx](images/fsx-1.jpg)
+- FSx Windows => NEXT
+![fsx](images/fsx-2.jpg)
+- Đặt tên và setup như hình. Tên có thể tùy ý
+![fsx](images/fsx-3.jpg)
+![fsx](images/fsx-4.jpg)
+- Các phần còn lại cứ để default. Sau đó NEXT => Xem lại option => Create File System
+- Sẽ mất 1 khoảng thời gian tầm 40 phút để khởi tạo FSx
