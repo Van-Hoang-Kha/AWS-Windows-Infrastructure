@@ -103,3 +103,33 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 ![internet-gateway](images/igw-3.jpg)
 - Chọn VPC của bài lab này
 ![internet-gateway](images/igw-4.jpg)
+
+2.4: Tạo Route Table
+- Tại VPC Management Console => Góc trái sẽ có những option => chọn Route Table => Đã có 1 route có sẵn đó là do khi chúng ta tạo VPC thì SDN (Software Defined Network) của AWS sẽ định hình 1 route cho chúng ta. 
+- Nên thực hiện việc đổi tên route này sao cho trực quan và dễ hiểu. Cách đổi tên thực hiện như hình dưới
+![route](images/rt-1.jpg)
+- Tại route này => chọn Edit route 
+![route](images/rt-2.jpg)
+- Chúng ta sẽ gắn vào IGW và route là 0.0.0.0/0 để đi ra internet => Save Changes
+![route](images/rt-3.jpg)
+- Chúng ta cũng chọn route này => Action => Edit Sunet Association => Gắn vào 2  subnet đã tạo để chuyển hóa 2 subnets này thành 2 public subnets => Save Associations
+![route](images/rt-4.jpg)
+- Tại phần Route Table Management Console => Góc phải => Create Route table => Tạo 1 private route table
+![route](images/rt-5.jpg)
+- Chọn route table vừa mới tạo => Edit Subnet Association => Add 2 subnet còn lại vào => sẽ tạo thành 2 private subnet => Save Associations
+![route](images/rt-6.jpg)
+![route](images/rt-7.jpg)
+
+2.5: Tạo NAT Gateway
+- Để cho private subnet ra được internet. Chúng ta cần phải có 1 NAT Gateway. NAT Gateway này sẽ nằm ở phân vùng public subnet
+- Tương tự như route table và internet gateway. Chúng ta chọn NAT Gateway ở menu bên trái => Create NAT Gateway
+- Lưu ý là phải Allocate Elastic IP cho NAT Gateway
+![nat-gateway](images/nat-gw-1.jpg)
+- NAT Gateway khởi tạo sẽ mất vài phút. Chúng ta đợi đến khi trạng thái từ Pending => Available là có thể sử dụng được. 
+- Trở về Route Table => chọn Private Route => Edit Route
+![nat-gateway](images/nat-gw-2.jpg)
+- Route 0.0.0.0/0 , gắn vào NAT Gateway để ra internet cho Private Subnet => Save Changes
+![nat-gateway](images/nat-gw-3.jpg)
+
+**3. Thiết kế AWS EC2** 
+
