@@ -21,7 +21,7 @@
 
  1. Sơ đồ mạng
  
-![Mô hình mạng trên AWS](https://github.com/minhhung1706/AWS-Windows-Infrastructure/blob/2df2a139620c71ab91e6409fd0d0a3d7fbb02bdb/Network-Diagram.png)
+![Mô hình mạng AWS](https://github.com/minhhung1706/AWS-Windows-Infrastructure/blob/d80492df28586e7b4e1519ee79f4b4d4511b02c0/images/Network-Diagram.png)
 
 Nhìn vào sơ đồ mạng này, chúng ta sẽ thấy những thành phần sau:
 
