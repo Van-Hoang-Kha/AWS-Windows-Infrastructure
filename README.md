@@ -237,3 +237,33 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 - Trở lại File Explorer và truy cập vào FSx như đã làm ở trên => Sẽ thấy folder mới tạo => Chuột phải => Map Network Drive => Sau khi xong sẽ thấy folder này ở local 
 ![fsx](images/fsx-15.jpg)
 ![fsx](images/fsx-16.jpg)
+
+**5. Thiết kế AWS RDS - Microsoft SQL và quản lý AWS RDS từ EC2** 
+- AWS Management Console => Relational Database Service => Create Database => Standard Create => MS SQL => Standard Edition => Chọn version mới nhất tại thời điểm các bạn thực hiện bài lab
+- Điền đầy đủ thông tin liệt kê: tên db, user name, password
+![aws-db](images/aws-db-2.jpg)
+![aws-db](images/aws-db-1.jpg)
+- DB Instance Class: Standard
+- Multi AZ: NO
+- Chọn VPC và Security Group cho DB. Lưu ý là SG phải có luôn cả default SG mà AWS Managed AD tạo ra và SG do chính bạn tạo
+![aws-db](images/aws-db-3.jpg)
+- chọn AZ cho DB.
+- Check box Enable Server Authentication 
+- Browse Directory => Chọn AWS Managed AD đã tạo ở trên
+- Các option còn lại để mặc định
+- Sau đó Create Database. Sẽ mất 1 khoảng thời gian tầm 40 phút để AWS tiến hành tạo DB
+![aws-db](images/aws-db-4.jpg)
+![aws-db](images/aws-db-5.jpg)
+- Sau đó chúng ta cũng phải check lại xem DB đã tạo thành công hay chưa. Nếu status là Available có nghĩa đã đã tạo thành công
+![aws-db](images/aws-db-6.jpg)
+- Login vào EC2 AD Manager đã tạo trước đó => Download [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15) => Download bản mới nhất có thể được lúc bạn làm bài lab này
+- Tiến hành cài đặt SQL Server Management Studio
+- Lưu ý là cài tool này phải có kết nối internet. Nếu như AD Manager không ra internet được thì nên xem lại NAT Gateway đã attach đúng chưa. Vì EC2 AD Manager nằm trong vùng Private Network.
+- Sau khi cài xong, quay trở lại AWS RDS console => chọn db vừa khởi tạo xong => copy end-point 
+![aws-db](images/aws-db-7.jpg)
+- Tại SQL Server Management Studio => Paste Endpoint => chỉnh option như hình => nhập username và password => connect
+![aws-db](images/aws-db-8.jpg)
+- Tại đây, chúng ta sẽ quản lý được Amazon RDS Service như bình thường chúng ta quản lý MS DB Server
+![aws-db](images/aws-db-9.jpg)
+
+
