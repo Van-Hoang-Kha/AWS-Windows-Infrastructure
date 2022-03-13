@@ -146,7 +146,7 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 - Chúng ta sẽ kiểm tra lại để xem AD có vào trạng thái Active hay chưa. Nếu trạng thái là Active thì có nghĩa là đã khởi tạo thành công. Một số trường hợp do underlied-host của AWS có vấn đề, nên có thể trạng thái AD sẽ là Failed. Nên kiểm tra chắc chắn lại.
 ![aws-ad](images/aws-ad-6.jpg)
 
-**4. Thiết kế AWS EC2** 
+**4. Thiết kế AWS EC2 và quản lý AWS Managed AD** 
 - Tại AWS Management Console => EC2 => Launch Instances
 ![ec2](images/ec2-1.jpg)
 - Chọn Windows Server 2022
@@ -197,8 +197,11 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 ![ec2](images/ec2-18.jpg)
 - Để hoàng thành việc quản lý AWS Managed AD. Chúng ta cần phải cài các dịch vụ cho EC2 AD-Manager. Các bạn làm Admin thì cũng không quá xa lạ gì với các dịch vụ này rồi
 - Vào Server Management => Add Role & Features => Next đến Features (chúng ta không promote AD nên bỏ qua phần server roles): Group Policy Management, Remote Server Administration Tools => Role Administration Tools: AD AD & AD LDS, DNS Server Tools => NEXT 
+![ec2](images/ec2-19.jpg)
 - Mất 1 lúc để hoàng thành việc setup. Sau đó kiểm tra lại sẽ thấy những server tools quen thuộc. 
 - Vậy là chúng ta đã hoàng thành việc quản trị AWS Managed AD trên EC2
+ NEXT 
+![ec2](images/ec2-20.jpg)
 
 **5. Thiết kế AWS FSx - Windows** 
 - AWS Management Console => Amazon FSx => Create File System
@@ -210,3 +213,20 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 ![fsx](images/fsx-4.jpg)
 - Các phần còn lại cứ để default. Sau đó NEXT => Xem lại option => Create File System
 - Sẽ mất 1 khoảng thời gian tầm 40 phút để khởi tạo FSx
+- chúng ta cũng nên check kĩ lưỡng để tránh trường hợp underlied-host của AWS có vấn đề. Khi thấy status là Available có nghĩa là FSx đã tạo xong và sẵn sàng sử dụng.
+![fsx](images/fsx-5.jpg)
+- Để tiến hành việc sử dụng FSx, chúng ta cần phải copy FSx DNS Name để tiến hành Map Network Drive. 
+- Nhấp chọn FSx đã khởi tạo => Network & Security => FSx DNS Name nằm ở dưới
+![fsx](images/fsx-6.jpg)
+- Các bạn lưu ý 1 chỗ là mặc định, File & sharing sẽ turned-off để đảm bảo an toàn hệ thống. Chúng ta có thể turn-on hoặc trigger cho windows server tự động turn-on bằng cách: File Explorer => Nhấp vào Network => Bây giờ thì Windows sẽ hiện 1 thanh nhỏ hỏi chúng ta có turn-on File-Sharing trên môi trường Network hay không => Turn On
+![fsx](images/fsx-8.jpg) 
+- FSx DNS Name khi nãy copy, bây giờ paste vào thanh address với cú pháp: \\FSx-DNS-Name => Enter => Sẽ truy cập đc vào FSx
+![fsx](images/fsx-7.jpg)
+- Chuột phải vào folder share => Map Network Drive => Tiến hành thực hiện Map Network Drive như bình thường. Sau khi xong chúng ta vào This PC trong File Explorer => sẽ thấy có folder share từ FSx về local
+![fsx](images/fsx-9.jpg)
+- Đây là folder share mặc định trên FSx. Nhưng giả sử chúng ta có nhiều phòng ban, thì có 1 giải pháp khác đó là FSx cũng cho phép chúng ta tự tạo ra folder share riêng
+- Menu Start => fsmgmt.msc (File Share Management) => Hiện ra 1 cửa sổ => Chuột phải => Connect to Another Computer
+![fsx](images/fsx-10.jpg)
+- Copy & Paste FSx DNS Name vào và OK 
+![fsx](images/fsx-11.jpg)
+![fsx](images/fsx-12.jpg)
