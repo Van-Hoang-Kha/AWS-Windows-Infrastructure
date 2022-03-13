@@ -230,3 +230,10 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 - Copy & Paste FSx DNS Name vào và OK 
 ![fsx](images/fsx-11.jpg)
 ![fsx](images/fsx-12.jpg)
+- Tại cửa sổ FSx File Share vừa kết nối sẽ thấy thư mục share => chuột phải => New Share => NEXT => Browse => sẽ thấy folder $d => chọn lấy và phía dưới bấm vào Make New Folder
+![fsx](images/fsx-13.jpg)
+- Đặt tên cho folder tùy ý => NEXT => Hiệu chỉnh phân quyền sơ lược cho folder này => Sau đó Finish 
+![fsx](images/fsx-14.jpg)
+- Trở lại File Explorer và truy cập vào FSx như đã làm ở trên => Sẽ thấy folder mới tạo => Chuột phải => Map Network Drive => Sau khi xong sẽ thấy folder này ở local 
+![fsx](images/fsx-15.jpg)
+![fsx](images/fsx-16.jpg)
