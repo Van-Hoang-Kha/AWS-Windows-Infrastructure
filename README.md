@@ -266,4 +266,146 @@ AWS quản lý phân quyền rất chặt chẽ. Vì vậy, mỗi 1 resource tr�
 - Tại đây, chúng ta sẽ quản lý được Amazon RDS Service như bình thường chúng ta quản lý MS DB Server
 ![aws-db](images/aws-db-9.jpg)
 
+**6. Thiết kế Hybrid DNS** 
+- AWS management console => Directory service => copy 2 DNS của AWS Managed AD đã tạo trước đó
+![hybrid-dns](images/hybird-dns-1.jpg)
+- AWS Management console => Route53 => outbound endpoint => configure endpoint
+![hybrid-dns](images/hybird-dns-2.jpg)
+![hybrid-dns](images/hybird-dns-3.jpg)
+- Inbound and Outbound => NEXT
+![hybrid-dns](images/hybird-dns-4.jpg)
+- Configure Inbound Endpoint => Điền đầy đủ thông tin bao gồm cả VPC => Lưu ý là chọn Private Subnet cho IP 1 và IP 2, SG chọn SG của AWS Maanaged AD => Điền tag đầy đủ vì đây cũng là 1 trong những best practices
+![hybrid-dns](images/hybird-dns-5.jpg)
+- làm tương tự cho Outbound endpoint
+![hybrid-dns](images/hybird-dns-6.jpg)
+- Create Rule thiết lập như hình những thông tin liên quan
+![hybrid-dns](images/hybird-dns-7.jpg)
+- Lưu ý: Target IP thì điền vào 2 IP của AWS Managed AD đã tạo trước đó
+- NEXT => review and create => sẽ mất 1 lúc để aws thiết lập 
+- Sau đó vài phút, log-in vào EC2 AD Manager => Chạy PowerShell với quyền Administrator => đánh lệnh như hình => Nếu thiết lập đúng sẽ trả về kết quả là hệ thống resolved được domain
+![hybrid-dns](images/hybird-dns-8.jpg)
+
+**7. Thực hiện Multi Region FSx Replication**
+- AWS Management Console => Góc phải phía trên => đổi qua region bất kỳ phù hợp
+![fsx-multi-region](images/fsx-multi-region-1.jpg)
+- Tại Region mới, chúng ta sẽ tiến hành thiết kế và xây dựng 1 hệ thống netwoerk mới gồm có: 
+=> VPC: 1 
+=> Subnet: 2: 1 Private và 1 Public
+=> Internet Gateway: 1
+=> Route Table: 2: mặc định đã có sẵn 1 route table khi tạo VPC, tạo thêm 1 route table cho private subnet
+=> NAT Gateway: 1
+- Sau khi phần khung network đã tạo xong, tiến hành tạo VPC Peering Connection 
+- Vào Security Group của cả 2 region. Add CHÉO dãy IP của VPC vào cả 2 phần Inbound và Outbound
+- Bên Region A thì add dãy IP của Region B vào Inbound và Outbound của SG và ngược lại
+- AWS Management Console (Region nào cũng được) => VPC => Peering Connection => Create Peering
+![fsx-multi-region](images/fsx-multi-region-2.jpg)
+- điền đầy đủ thông tin tương ứng theo lab bạn làm như gợi ý ờ hình dưới => Create Peering Connection
+![fsx-multi-region](images/fsx-multi-region-3.jpg)
+- Mất 1 lúc tầm vài phút để AWS thiết lập Peering Connection
+- Nếu Region A của bạn làm Peering Requester, thì qua Region B => Peering Connection => Accept Request
+![fsx-multi-region](images/fsx-multi-region-4.jpg)
+- Khi Peering Connection đã Active => vào Route Table cả 2 Region => Cả Private và Public Route => Add CHÉO IP và add vào Peering Connection => Save Changes
+![fsx-multi-region](images/fsx-multi-region-5.jpg)
+- Tạo Security Group ở Region mới, Add rule (inbound & ountbound) All Traffic và Rule IP của Region cũ. Tương tự, phần SG bên Region cũ, tạo thêm rule (inbound & ountbound) add vào dãy IP của region mới (Add Chéo)
+- Ở Region mới => Tạo 1 FSx - Windows 
+- Phần Windows Authentication => Self Managed Domain => Điền thông tin của AWS Managed AD đã tạo 
+![fsx-multi-region](images/fsx-multi-region-6.jpg)
+- Delegated file system administrator group => Login vào AD Manager => Active Directory User and Computer => Copy & Paste tên group như hình 
+![fsx-multi-region](images/fsx-multi-region-7.jpg)
+![fsx-multi-region](images/fsx-multi-region-8.jpg)
+- Sẽ mất 1 lúc để tạo FSx như đã làm trước đó
+- Sau khi tạo xong cũng nên check xem status đã Available hay chưa
+- Khi status đã Available => login vào EC2 AD Manager => truy cập vào FSx bên Region mới như đã làm với Region Cũ trước đó. Thấy truy cập thành công như hình là đã thực hiện được việc kết nối File Server giữa 2 Region
+- Như hình dưới, chú ý tên trên 2 File Explorer khác nhau biểu hiện cho 2 FSx khác nhau ở 2 Region
+ ![fsx-multi-region](images/fsx-multi-region-9.jpg)
+- Tiến hành việc thực hiện DataSync
+- Theo như link bài lab gốc đã đưa trên thì phải tạo EC2 Sync Agent. Nhưng thật tế là không cần thiết. Chúng ta sẽ thực hiện như sau 
+- AWS Management Console (Region nào cũng được) => DataSync => Create Task (góc phải trên) 
+
+=> Source Location: điền đầy đủ thông tin liên quan đến FSx bên Region là Source. 
+
+=> Lưu ý phần **Share name: phần này là phải điền đúng tên và đường dẫn của folder trong FSx mà muốn thực hiện Data Sync. Mục đích của bài lab nên mình điền share. Thật tế tùy vào kiến trúc File Server FSx mà bạn thiết lập**
+![fsx-multi-region](images/fsx-multi-region-10.jpg)
+![fsx-multi-region](images/fsx-multi-region-11.jpg)
+- NEXT 
+- Destination Location: điền đầy đủ thông tin liên quan đến FSx bên Region là Destination.
+- Configure Setting: Điền tên => phía dưới: DO NOT SEND LOGS CLOUD WATCH => NEXT => Create Task
+- Sẽ mất 1 lúc tầm vài phút để tạo task DataSync
+![fsx-multi-region](images/fsx-multi-region-12.jpg)
+- Sau khi task đã available => start => sync with default
+![fsx-multi-region](images/fsx-multi-region-13.jpg)
+- Kiểm tra trạng thái Sync trong phần History sẽ thấy báo Success
+![fsx-multi-region](images/fsx-multi-region-14.jpg)
+- Kiểm tra data trong FSx sẽ thấy đã Sync thành công
+![fsx-multi-region](images/fsx-multi-region-15.jpg)
+- Lưu ý, nếu test thêm vài lần nữa, sẽ thấy rằng phần History báo Error
+![fsx-multi-region](images/fsx-multi-region-16.jpg)
+- Điều này không ảnh hưởng gì, lý do DataSync báo là vì nó sẽ so sánh dữ liệu của cả 2 region, nếu như 1 bên có dữ liệu không trùng khớp thì sẽ thông báo error. Nhưng khi check trong nội bộ FSx thì data vẫn được sync
+![fsx-multi-region](images/fsx-multi-region-17.jpg)
+- Do vậy, Không khuyến khích xài DataSync FSx trong thực tế. Trường hợp nên xài DataSync FSx như vầy chỉ nên xài cho log file hoặc backup. 
+- Một giải pháp khác là có thể xài S3 Cross Region Replication (S3 CRR) + S3 Bucket Versioning sẽ thực hiện việc đồng bộ hóa dữ liệu tốt nhất và giảm thiểu được tác vụ thiết lập cũng như bảo trì Multi Reion FSx
+- Ngoài ra, S3 cũng hỗ trợ cấu hình S3 Lifecycle để tự động di chuyển data giữa các tier lưu trữ S3 nhằm tiết kiệm chi phí tối đa. 
+- Có thể tham khảo tại đây [S3 CRR](https://github.com/minhhung1706/AWS-Implemented-CRR-S3/blob/main/AWS-Implemented-CrossRegionReplication-S3.md) 
+
+**8. Thực hiện Hybrid Active Directory**
+- Dùng để thực hiện 2-way-trusted giữa On-Premis AD và AWS Managed AD
+- Chuẩn bị cho bải lab này:
+
+=> Tạo thêm 1 VPC mới giả lập làm on-premis. Trong môi trường thực tế, có thể bạn sẽ cần phải tham khảo qua dịch vụ [AWS AD Connector](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/directory_ad_connector.html)
+
+=> Không nên dùng dãy IP quá 10 cho VPC, vì sẽ dễ dàng nhầm lẫn route ra internet. Nên dùng dãy IP dưới 10.0.0.0 và dãy IP 172.0.0.0 là tốt nhất
+
+=> Tạo đầy đủ Internet Gateway, Route Table, NAT Gateway
+
+=> Thiết lập VPC Peering cho 2 VPC mới và cũ. Đây chỉ là cho mục đích bài lab để 2 môi trường có thể liên lạc được với nhau
+
+=> Trong trường hợp thực tế On-Premis <=> AWS | Sẽ phải xem xét đến [Site-to-Site VPN](https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html) | Lý do là On-Premis thật tế sẽ không thuộc AWS. Còn VPC trong bài lab này là thuộc về AWS nên xài VPC Peering được.
+
+=> Kiểm tra và add rule Security Group (inbound và outbound) dãy IP của cả 2 VPC
+
+=> Kiểm tra và add VPC Peering Connection vào Route Table
+
+=> Tạo 3 EC2 trong VPC mới(tên tùy ý, miễn sau trực quan, không nhầm lẫn). Add: Jumphost, Local-1, Local-2
+
+=> Đây là cách thực hiện thiết kế theo best practices mà AWS đề ra, Vì khi tạo AWS Managed AD, cũng bắt buộc phải có 2 AZ để thỏa mãn High-Availability (HA) architect. Do vậy, cũng phải có từ 2 trở lên AD để thỏa mãn điều kiện HA architect
+
+=> Local-1 và Local-2 Promte lên thành Domain Controller. Mặc định thì Local-1 sẽ là Main DC, Local-2 sẽ là child dc trong forest
+
+=> Mở hosts file của tất cả các máy và add ip và dns name vào như hình minh họa phía dưới
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-1.jpg)
+
+=> Kiểm tra và Add lại IP tĩnh cho Local-1 và Local-2
+
+=> Lưu ý: khi dùng ipconfig /all trên EC2 làm Main DC (Local-1), sẽ thấy 1 DNS lạ, cái này là DNS của Underlied-host từ AWS
+
+=> Khi add ip và DNS cho Main DC (Local-1), thì phải add DNS của underlied-host và IP của chính máy Main DC (Local-1) vào phần DNS
+
+=> Khi add ip và DNS cho child DC (Local-2), thì phải add IP của Local-1 và IP của Local-2 vào phần DNS
+
+=> Khi đã promote xong cả 2 EC2 là Local-1 và Local-2 thành DC. Login vào và thực hiện tạo Forward Lookup Zone
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-2.jpg)
+
+=> sau đó sẽ tạo Conditional Forwarder
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-3.jpg)
+
+- Tại máy Local DC => Active Directory Domain & Trust => Properties => Trust => New Trust
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-5.jpg)
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-6.jpg)
+
+- Forest Trust => 2-Way => This domain only =>Forest-Wide Authentication => NEXT => Tạo Password => Lưu ý: Password này nên tạo giống password của AWS Mananged AD
+- NEXT => DO NOT CONFORM OUTGOING TRUST => NEXT => Finished
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-7.jpg)
+
+- AWS Management Console => Directory Service => AD đã tạo => Add Trust Relationship
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-4.jpg)
+- điền các thông tin tương ứng phù hợp như hình minh họa
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-8.jpg)
+- Như đã giải thích ỡ trên, thì chúng ta sẽ thấy có 3 IP được add vào. 2 IP của EC2 Local-1 và Local-2. 1 IP còn lại chính là underlied-host của AWS lấy được khi sử dụng lệnh ipconfig /all trên Local-1 (Main DC)
+- Đã verified thành công
+![aws-onpremis-trusted-ad](images/aws-onpremis-ad-trust-9.jpg).
+
+----------------------------------------------------------------------------
+# Vậy là đã xong toàn bộ lab. Lưu ý là hãy kiểm tra và xóa tất cả resouces để tránh chi trả phí AWS không cần thiết
+
+
 
